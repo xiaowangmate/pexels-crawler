@@ -1,0 +1,148 @@
+activist
+actor
+actuary
+african people
+american people
+anesthesiologist
+anthropologist
+arab people
+arborist
+architect
+artist
+asian
+asian family
+asian people
+astronomer
+athlete
+author
+baby
+baker
+ballerina
+barber
+biologist
+boy
+brewer
+broker
+butcher
+canadian people
+cartographer
+cashier
+chef
+chemist
+child
+children
+chinese people
+chiropractor
+coach
+compliance officer
+counselor
+crowds
+customer service representative
+dancer
+daughter
+dentist
+dermatologist
+diplomat
+dispatcher
+doctor
+editor
+elder
+electrician
+engineer
+entrepreneur
+environmentalist
+epidemiologist
+farmer
+father
+financial analyst
+firefighter
+flight attendant
+flight controller
+french people
+gardener
+geologist
+german people
+girl
+granddaughter
+grandfather
+grandmother
+grandpa
+grandson
+graphic designer
+historian
+hr manager
+human
+indian people
+interpreter
+italian people
+janitor
+japanese people
+journalist
+judge
+korean
+korean people
+landscaper
+lawyer
+librarian
+lobbyist
+locksmith
+man
+market researcher
+mason
+mechanic
+mediator
+men
+miner
+mother
+musician
+nanny
+nurse
+nutritionist
+old man
+oncologist
+palyer
+paralegal
+people
+performer
+person
+philosopher
+physicist
+pilot
+plumber
+podiatrist
+police officer
+politician
+professor
+prosecutor
+psychologist
+publisher
+quality assurance specialist
+radiologist
+real estate agent
+receptionist
+roofer
+safety officer
+sailor
+sales representative
+scientist
+security guard
+sociologist
+software engineer
+soldier
+son
+statistician
+stockbroker
+student
+tailor
+tax advisor
+teacher
+teenager
+theologian
+tour guide
+urban planner
+veterinarian
+web developer
+woman
+women
+worker
+young man
