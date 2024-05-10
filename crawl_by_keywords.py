@@ -8,7 +8,7 @@ scraper = cfscrape.create_scraper()
 
 
 class PexelsKeywordCrawler:
-    def __init__(self, keywords_path):
+    def __init__(self, keywords_path, output_base_dir):
         self.headers = {
             "Referer": "https://www.pexels.com/videos/",
             "Secret-Key": "H2jk9uKnhRmL6WPwh89zBezWvr",
@@ -19,7 +19,7 @@ class PexelsKeywordCrawler:
         self.keywords_path = keywords_path
         self.current_processing_keyword_index_path = "current_processing_keyword_index.txt"
         self.crawled_ids_path = "crawled_id_list.txt"
-        self.output_base_dir = "download"
+        self.output_base_dir = output_base_dir
         self.dir_check(self.output_base_dir)
         self.file_check(self.current_processing_keyword_index_path, "0")
         self.file_check(self.crawled_ids_path, "")
@@ -138,5 +138,5 @@ class PexelsKeywordCrawler:
 
 
 if __name__ == '__main__':
-    pkc = PexelsKeywordCrawler("humankeywords.txt")
+    pkc = PexelsKeywordCrawler("humankeywords.txt", "download")
     pkc.start_crawl()
