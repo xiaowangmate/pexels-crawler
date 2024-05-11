@@ -104,11 +104,13 @@ class PexelsKeywordCrawler:
             if selected_resolution_download_url == link:
                 return link
             else:
-                width, height = map(int, re.findall(r'(\d+)_', link))
-                diff = abs(selected_resolution_width - width) + abs(selected_resolution_height - height)
-                if diff < best_match_diff:
-                    best_match_url = link
-                    best_match_diff = diff
+                match = re.findall(r'(\d+)_', download_url)
+                if match:
+                    width, height = map(int, match)
+                    diff = abs(selected_resolution_width - width) + abs(selected_resolution_height - height)
+                    if diff < best_match_diff:
+                        best_match_url = link
+                        best_match_diff = diff
         return best_match_url
 
     def select_resolution_for_download(self, video_json, resolution="1280x720"):
@@ -135,7 +137,6 @@ class PexelsKeywordCrawler:
                         0]
                 selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
                 download_url = self.download_url_matching(selected_resolution_download_url, video_json["attributes"]["video"]["video_files"])
-                print(f"download_url: {download_url}")
                 self.download_video(video_id, download_url, output_path)
                 if video_id not in self.crawled_id_list:
                     caption = video_json["attributes"]["title"]
