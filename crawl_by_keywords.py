@@ -135,6 +135,7 @@ class PexelsKeywordCrawler:
                         0]
                 selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
                 download_url = self.download_url_matching(selected_resolution_download_url, video_json["attributes"]["video"]["video_files"])
+                print(f"download_url: {download_url}")
                 self.download_video(video_id, download_url, output_path)
                 if video_id not in self.crawled_id_list:
                     caption = video_json["attributes"]["title"]
