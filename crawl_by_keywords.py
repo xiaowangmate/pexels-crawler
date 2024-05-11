@@ -95,12 +95,21 @@ class PexelsKeywordCrawler:
         total_pages = response["pagination"]["total_pages"]
         return total_pages
 
-    def judge_download_url_exist(self, selected_resolution_download_url, download_url_list):
+    def download_url_matching(self, selected_resolution_download_url, download_url_list):
+        best_match_url = None
+        best_match_diff = float("inf")
+        selected_resolution_width, selected_resolution_height = map(int, re.findall(r'(\d+)_', selected_resolution_download_url))
         for download_url in download_url_list:
             link = download_url["link"]
             if selected_resolution_download_url == link:
-                return True
-        return False
+                return link
+            else:
+                width, height = map(int, re.findall(r'(\d+)_', link))
+                diff = abs(selected_resolution_width - width) + abs(selected_resolution_height - height)
+                if diff < best_match_diff:
+                    best_match_url = link
+                    best_match_diff = diff
+        return best_match_url
 
     def select_resolution_for_download(self, video_json, resolution="1280x720"):
         """
@@ -122,16 +131,11 @@ class PexelsKeywordCrawler:
             if default_download_url:
                 print(f'video_json["attributes"]: {video_json["attributes"]}')
                 fps = \
-                re.findall("https://videos.pexels.com/video-files/.*?/.*?_(\d{1,3})fps.mp4", default_download_url)[
-                    0]
+                    re.findall("https://videos.pexels.com/video-files/.*?/.*?_(\d{1,3})fps.mp4", default_download_url)[
+                        0]
                 selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
-                if self.judge_download_url_exist(selected_resolution_download_url,
-                                                 video_json["attributes"]["video"]["video_files"]):
-                    print(f"download_url: {selected_resolution_download_url}")
-                else:
-                    print(f"download_url: {selected_resolution_download_url} don't exist, modify to default url")
-                    selected_resolution_download_url = default_download_url
-                self.download_video(video_id, selected_resolution_download_url, output_path)
+                download_url = self.download_url_matching(selected_resolution_download_url, video_json["attributes"]["video"]["video_files"])
+                self.download_video(video_id, download_url, output_path)
                 if video_id not in self.crawled_id_list:
                     caption = video_json["attributes"]["title"]
                     self.video_info_record(video_id, caption)
