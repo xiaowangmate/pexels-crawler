@@ -49,6 +49,10 @@ class PexelsKeywordCrawler:
             ids.write(f"{video_id}\n")
             self.crawled_id_list.append(video_id)
 
+    def update_keyword_index(self, keyword_index):
+        with open(self.current_processing_keyword_index_path, mode="w", encoding="utf-8") as ki:
+            ki.write(f"{keyword_index}")
+
     def video_info_record(self, video_id, caption):
         with open(f"{self.output_base_dir}/video_info.jsonl", mode="a+", encoding="utf-8") as record:
             video_info_dict = {"video_id": video_id, "keyword": self.keyword, "caption": caption}
@@ -73,20 +77,30 @@ class PexelsKeywordCrawler:
                     data = response["data"]
                     self.parse(data)
 
+                self.keyword_index += 1
+                self.update_keyword_index(self.keyword_index)
+
     def parse(self, data):
         for video in data:
             video_id = video["id"]
-            if video_id not in self.crawled_id_list:
-                if video["attributes"]["width"] > video["attributes"]["height"]:
-                    self.select_resolution_for_download(video)
-                else:
-                    self.select_resolution_for_download(video, resolution="720x1280")
+            # if video_id not in self.crawled_id_list:
+            if video["attributes"]["width"] > video["attributes"]["height"]:
+                self.select_resolution_for_download(video)
             else:
-                print(f"Video exist: {video_id}")
+                self.select_resolution_for_download(video, resolution="720x1280")
+            # else:
+            #     print(f"Video exist: {video_id}")
 
     def get_total_pages(self, response):
         total_pages = response["pagination"]["total_pages"]
         return total_pages
+
+    def judge_download_url_exist(self, selected_resolution_download_url, download_url_list):
+        for download_url in download_url_list:
+            link = download_url["link"]
+            if selected_resolution_download_url == link:
+                return True
+        return False
 
     def select_resolution_for_download(self, video_json, resolution="1280x720"):
         """
@@ -104,20 +118,25 @@ class PexelsKeywordCrawler:
         output_path = f"{self.output_base_dir}/{self.keyword}/{video_id}.mp4"
         if not os.path.exists(output_path):
             default_download_url = video_json["attributes"]["video"]["src"]
+            print(f"default_download_url: {default_download_url}")
             if default_download_url:
                 print(f'video_json["attributes"]: {video_json["attributes"]}')
-                try:
-                    fps = \
-                        re.findall("https://videos.pexels.com/video-files/.*?/.*?0_(\d{1,3})fps.mp4",
-                                   default_download_url)[0]
-                    selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
-                except Exception as e:
-                    print(f"select resolution for download error: {str(e)}")
+                fps = \
+                re.findall("https://videos.pexels.com/video-files/.*?/.*?_(\d{1,3})fps.mp4", default_download_url)[
+                    0]
+                selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
+                if self.judge_download_url_exist(selected_resolution_download_url,
+                                                 video_json["attributes"]["video"]["video_files"]):
+                    print(f"download_url: {selected_resolution_download_url}")
+                else:
+                    print(f"download_url: {selected_resolution_download_url} don't exist, modify to default url")
                     selected_resolution_download_url = default_download_url
-                print(f"download_url: {selected_resolution_download_url}")
                 self.download_video(video_id, selected_resolution_download_url, output_path)
-                caption = video_json["attributes"]["title"]
-                self.video_info_record(video_id, caption)
+                if video_id not in self.crawled_id_list:
+                    caption = video_json["attributes"]["title"]
+                    self.video_info_record(video_id, caption)
+            else:
+                print(f"Video error: {video_id}, {video_json}")
         else:
             print(f"Video exist: {video_id}")
         self.update_crawled_ids(video_id)
@@ -138,5 +157,5 @@ class PexelsKeywordCrawler:
 
 
 if __name__ == '__main__':
-    pkc = PexelsKeywordCrawler("humankeywords.txt", "download")
+    pkc = PexelsKeywordCrawler("humankeywords.txt", "G:\Pexels Human")
     pkc.start_crawl()
