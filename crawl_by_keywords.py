@@ -174,5 +174,5 @@ class PexelsKeywordCrawler:
 
 
 if __name__ == '__main__':
-    pkc = PexelsKeywordCrawler("humankeywords.txt", ".")
+    pkc = PexelsKeywordCrawler("humankeywords.txt", "G:\Pexels Human")
     pkc.start_crawl()
