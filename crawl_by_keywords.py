@@ -115,7 +115,7 @@ class PexelsKeywordCrawler:
             if selected_resolution_download_url == link:
                 return link
             else:
-                match = re.findall(r'(\d+)_', download_url)
+                match = re.findall(r'(\d+)_', link)
                 if match:
                     width, height = map(int, match)
                     diff = abs(selected_resolution_width - width) + abs(selected_resolution_height - height)
