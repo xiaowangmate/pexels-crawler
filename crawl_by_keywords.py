@@ -3,6 +3,7 @@ import re
 import json
 import time
 import cfscrape
+from concurrent.futures import ThreadPoolExecutor
 
 scraper = cfscrape.create_scraper()
 
@@ -71,25 +72,34 @@ class PexelsKeywordCrawler:
                 self.parse(data)
 
                 total_pages = self.get_total_pages(response)
-                for i in range(2, int(total_pages) + 1):
-                    page_url = self.search_url.format(i, self.keyword)
-                    response = json.loads(scraper.get(page_url, headers=self.headers).text)
-                    data = response["data"]
-                    self.parse(data)
+
+                with ThreadPoolExecutor(max_workers=5) as executor:
+                    for i in range(2, int(total_pages) + 1):
+                        # page_url = self.search_url.format(i, self.keyword)
+                        # response = json.loads(scraper.get(page_url, headers=self.headers).text)
+                        # data = response["data"]
+                        # self.parse(data)
+                        executor.submit(self.crawl_page, i)
 
                 self.keyword_index += 1
                 self.update_keyword_index(self.keyword_index)
 
+    def crawl_page(self, page):
+        page_url = self.search_url.format(page, self.keyword)
+        response = json.loads(scraper.get(page_url, headers=self.headers).text)
+        data = response["data"]
+        self.parse(data)
+
     def parse(self, data):
         for video in data:
             video_id = video["id"]
-            # if video_id not in self.crawled_id_list:
-            if video["attributes"]["width"] > video["attributes"]["height"]:
-                self.select_resolution_for_download(video)
+            if video_id not in self.crawled_id_list:
+                if video["attributes"]["width"] > video["attributes"]["height"]:
+                    self.select_resolution_for_download(video)
+                else:
+                    self.select_resolution_for_download(video, resolution="720x1280")
             else:
-                self.select_resolution_for_download(video, resolution="720x1280")
-            # else:
-            #     print(f"Video exist: {video_id}")
+                print(f"Video exist: {video_id}")
 
     def get_total_pages(self, response):
         total_pages = response["pagination"]["total_pages"]
@@ -98,7 +108,8 @@ class PexelsKeywordCrawler:
     def download_url_matching(self, selected_resolution_download_url, download_url_list):
         best_match_url = None
         best_match_diff = float("inf")
-        selected_resolution_width, selected_resolution_height = map(int, re.findall(r'(\d+)_', selected_resolution_download_url))
+        selected_resolution_width, selected_resolution_height = map(int, re.findall(r'(\d+)_',
+                                                                                    selected_resolution_download_url))
         for download_url in download_url_list:
             link = download_url["link"]
             if selected_resolution_download_url == link:
@@ -136,11 +147,11 @@ class PexelsKeywordCrawler:
                     re.findall("https://videos.pexels.com/video-files/.*?/.*?_(\d{1,3})fps.mp4", default_download_url)[
                         0]
                 selected_resolution_download_url = f"https://videos.pexels.com/video-files/{video_id}/{video_id}-{quality}_{resolution}_{fps}fps.mp4"
-                download_url = self.download_url_matching(selected_resolution_download_url, video_json["attributes"]["video"]["video_files"])
+                download_url = self.download_url_matching(selected_resolution_download_url,
+                                                          video_json["attributes"]["video"]["video_files"])
                 self.download_video(video_id, download_url, output_path)
-                if video_id not in self.crawled_id_list:
-                    caption = video_json["attributes"]["title"]
-                    self.video_info_record(video_id, caption)
+                caption = video_json["attributes"]["title"]
+                self.video_info_record(video_id, caption)
             else:
                 print(f"Video error: {video_id}, {video_json}")
         else:
@@ -163,5 +174,5 @@ class PexelsKeywordCrawler:
 
 
 if __name__ == '__main__':
-    pkc = PexelsKeywordCrawler("humankeywords.txt", "G:\Pexels Human")
+    pkc = PexelsKeywordCrawler("humankeywords.txt", ".")
     pkc.start_crawl()
